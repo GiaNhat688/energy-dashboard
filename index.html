@@ -48,7 +48,6 @@
         .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-weight: 600; color: var(--primary); }
         .chart-container { position: relative; height: 180px; width: 100%; }
         
-        /* Tinh chỉnh cho DataTables */
         .dataTables_wrapper .pagination .page-link { border-radius: 5px; margin: 0 3px; }
         table.dataTable { border-collapse: collapse !important; }
     </style>
@@ -88,7 +87,12 @@
             </div>
 
             <div class="setting-box mt-2">
-                <h5 class="mb-3"><i class="fas fa-table text-secondary me-2"></i> Bảng dữ liệu tự động phân trang</h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="fas fa-table text-secondary me-2"></i> Bảng dữ liệu tự động phân trang</h5>
+                    <button class="btn btn-danger btn-sm" onclick="clearLogs()">
+                        <i class="fas fa-trash-alt me-1"></i> Xóa dữ liệu cũ
+                    </button>
+                </div>
                 <table id="logTable" class="table table-hover text-center align-middle" style="width:100%">
                     <thead class="table-dark">
                         <tr>
@@ -100,8 +104,7 @@
                             <th>Thành tiền (VNĐ)</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
@@ -146,8 +149,8 @@
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
                     const btn = document.getElementById('btn-relay'); const text = document.getElementById('relay-text'); const status = document.getElementById('status-text');
-                    if(currentRelayState === 0) { btn.className = "btn-relay btn-on"; text.innerText = "ON"; status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>"; } 
-                    else { btn.className = "btn-relay btn-off"; text.innerText = "OFF"; status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>"; }
+                    if(currentRelayState === 0) { btn.className = "btn-relay btn-on"; text.innerText = "ON"; status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện (Đang lưu Log)</span>"; } 
+                    else { btn.className = "btn-relay btn-off"; text.innerText = "OFF"; status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt (Đã dừng Log)</span>"; }
                 }
             }
         });
@@ -177,38 +180,42 @@
             }
         });
 
-        // ==========================================
-        // KHỞI TẠO DATATABLES (PHÂN TRANG TỰ ĐỘNG)
-        // ==========================================
+        // Khởi tạo Bảng
+        let logTable;
         $(document).ready(function() {
-            const logTable = $('#logTable').DataTable({
-                order: [[0, 'desc']], // Luôn xếp thời gian mới nhất lên đầu
-                pageLength: 10,       // 10 dòng 1 trang
+            logTable = $('#logTable').DataTable({
+                order: [[0, 'desc']], // Luôn xếp dòng mới nhất lên đầu bảng
+                pageLength: 10,
                 lengthMenu: [5, 10, 25, 50],
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' // Giao diện tiếng Việt
-                }
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' }
             });
 
-            // Hàm dùng chung để update mảng dữ liệu của Chart (Giữ lại 15 điểm mới nhất)
-            function updateChartData(chart, timeLabel, newValue) {
-                chart.data.labels.push(timeLabel);
-                chart.data.datasets[0].data.push(newValue);
-                if(chart.data.labels.length > 15) {
-                    chart.data.labels.shift();
-                    chart.data.datasets[0].data.shift();
+            // Lắng nghe dữ liệu mới để vẽ BIỂU ĐỒ (Chỉ lấy 15 cái mới nhất)
+            db.ref('/logs').limitToLast(15).on('value', (snapshot) => {
+                const labels=[], dataV=[], dataI=[], dataP=[], dataE=[], dataCost=[];
+                if(snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        const log = child.val();
+                        if(log['0_time']) {
+                            labels.push(log['0_time'].split(' ')[1] || log['0_time']);
+                            dataV.push(log['1_v'] || 0); dataI.push(log['2_i'] || 0); dataP.push(log['3_p'] || 0);
+                            const e = log['4_e'] || 0; dataE.push(e); dataCost.push((e * costPerKwh).toFixed(0));
+                        }
+                    });
                 }
-                chart.update();
-            }
+                chartV.data.labels = labels; chartV.data.datasets[0].data = dataV; chartV.update();
+                chartI.data.labels = labels; chartI.data.datasets[0].data = dataI; chartI.update();
+                chartP.data.labels = labels; chartP.data.datasets[0].data = dataP; chartP.update();
+                chartE.data.labels = labels; chartE.data.datasets[0].data = dataE; chartE.update();
+                chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
+            });
 
-            // Lắng nghe MỖI KHI CÓ 1 DÒNG MỚI ĐƯỢC ĐẨY LÊN FIREBASE
+            // Lắng nghe từng dòng để nạp vào BẢNG (Nhỏ giọt từng dòng mượt mà)
             db.ref('/logs').on('child_added', (snapshot) => {
                 const log = snapshot.val();
-                if(log['0_time']) {
+                if(log && log['0_time']) {
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
-                    
-                    // 1. CHÈN DÒNG MỚI VÀO BẢNG DATATABLE
                     logTable.row.add([
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
                         log['1_v'] !== undefined ? log['1_v'].toFixed(1) : '-',
@@ -216,18 +223,20 @@
                         `<span class="fw-bold text-danger">${log['3_p'] !== undefined ? log['3_p'].toFixed(1) : '-'}</span>`,
                         `<span class="text-success">${e.toFixed(3)}</span>`,
                         `<span class="fw-bold" style="color:#0dcaf0;">${costStr}</span>`
-                    ]).draw(false); // false: Giữ nguyên trang người dùng đang xem, không bị văng về trang 1
-
-                    // 2. CẬP NHẬT BIỂU ĐỒ BÊN TRÊN
-                    const timeOnly = log['0_time'].split(' ')[1] || log['0_time'];
-                    updateChartData(chartV, timeOnly, log['1_v'] || 0);
-                    updateChartData(chartI, timeOnly, log['2_i'] || 0);
-                    updateChartData(chartP, timeOnly, log['3_p'] || 0);
-                    updateChartData(chartE, timeOnly, e);
-                    updateChartData(chartCost, timeOnly, (e * costPerKwh).toFixed(0));
+                    ]).draw(false);
                 }
             });
         });
+
+        // HÀM XÓA DỮ LIỆU
+        function clearLogs() {
+            if(confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu lịch sử không? Hành động này không thể hoàn tác.")) {
+                db.ref('/logs').remove().then(() => {
+                    logTable.clear().draw(); // Xóa sạch bảng
+                    alert("Đã xóa toàn bộ dữ liệu lịch sử thành công!");
+                }).catch((err) => alert("Lỗi khi xóa: " + err));
+            }
+        }
 
         function saveSettings() {
             db.ref('/settings').set({ max_power: parseFloat(document.getElementById('set-max-power').value), cost: parseFloat(document.getElementById('set-cost').value) })

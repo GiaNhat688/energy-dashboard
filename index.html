@@ -31,12 +31,14 @@
         .tab-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .data-card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border-bottom: 4px solid var(--secondary); height: 100%; }
+        .data-card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border-bottom: 4px solid var(--secondary); height: 100%; position: relative; overflow: hidden; }
         .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px; }
         .icon-v { background: #e0f2fe; color: #0284c7; } .icon-i { background: #fef08a; color: #ca8a04; }
         .icon-p { background: #fce7f3; color: #db2777; } .icon-e { background: #dcfce7; color: #16a34a; }
         .card-value { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin: 5px 0 0 0; }
         .unit { font-size: 1rem; color: #94a3b8; }
+        /* Trang trí thêm góc thẻ Card */
+        .card-bg-icon { position: absolute; right: -10px; bottom: -15px; font-size: 6rem; opacity: 0.04; color: var(--primary); }
 
         .relay-control { background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eaeaea;}
         .btn-relay { width: 150px; height: 150px; border-radius: 50%; border: none; font-size: 1.4rem; font-weight: bold; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 15px 25px rgba(0,0,0,0.15); transition: all 0.3s ease; }
@@ -49,12 +51,17 @@
         .setting-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-weight: 600; color: var(--primary); }
         .chart-container { position: relative; height: 180px; width: 100%; }
+        .chart-container-large { position: relative; height: 260px; width: 100%; }
         
         .dataTables_wrapper .pagination .page-link { border-radius: 5px; margin: 0 3px; }
         table.dataTable { border-collapse: collapse !important; }
         
         .table-on th { background-color: #198754 !important; color: white; }
         .table-off th { background-color: #dc3545 !important; color: white; }
+        
+        /* Hiệu ứng nhấp nháy cho chữ LIVE */
+        .pulse-live { animation: pulse 1.5s infinite; color: #dc3545; font-size: 0.8rem; margin-left: 5px; vertical-align: top; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -72,14 +79,83 @@
     <div class="main-content">
         
         <div id="tab-dashboard" class="tab-section active">
-            <h2 class="header-title">Live Dashboard</h2><p class="header-subtitle">Real-time energy monitoring</p>
+            <h2 class="header-title">Live Dashboard <i class="fas fa-circle pulse-live"></i></h2>
+            <p class="header-subtitle">Real-time energy monitoring</p>
+            
             <div class="row g-4 mb-4">
-                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #0284c7;"><div class="icon-box icon-v"><i class="fas fa-plug"></i></div><div class="card-title">Voltage</div><h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3></div></div>
-                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #ca8a04;"><div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div><div class="card-title">Current</div><h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3></div></div>
-                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #db2777;"><div class="icon-box icon-p"><i class="fas fa-bolt"></i></div><div class="card-title">Active Power</div><h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3></div></div>
-                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #16a34a;"><div class="icon-box icon-e"><i class="fas fa-leaf"></i></div><div class="card-title">Total Energy</div><h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3></div></div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #0284c7;">
+                        <i class="fas fa-plug card-bg-icon"></i>
+                        <div class="icon-box icon-v"><i class="fas fa-plug"></i></div>
+                        <div class="card-title">Voltage</div>
+                        <h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #ca8a04;">
+                        <i class="fas fa-wave-square card-bg-icon"></i>
+                        <div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div>
+                        <div class="card-title">Current</div>
+                        <h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #db2777;">
+                        <i class="fas fa-bolt card-bg-icon"></i>
+                        <div class="icon-box icon-p"><i class="fas fa-bolt"></i></div>
+                        <div class="card-title">Active Power</div>
+                        <h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #16a34a;">
+                        <i class="fas fa-leaf card-bg-icon"></i>
+                        <div class="icon-box icon-e"><i class="fas fa-leaf"></i></div>
+                        <div class="card-title">Total Energy</div>
+                        <h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3>
+                    </div>
+                </div>
             </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="setting-box" style="height: 100%;">
+                        <h6><i class="fas fa-chart-area text-danger me-2"></i> Live Power Trend</h6>
+                        <div class="chart-container-large mt-3">
+                            <canvas id="livePowerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="setting-box" style="height: 100%;">
+                        <h6><i class="fas fa-info-circle text-primary me-2"></i> System Overview</h6>
+                        <ul class="list-group list-group-flush mt-3">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
+                                System Status
+                                <span id="dash-sys-status" class="badge bg-secondary rounded-pill px-3 py-2">Connecting...</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
+                                Electricity Rate
+                                <span class="fw-bold text-dark"><span id="dash-rate">3500</span> VNĐ/kWh</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
+                                Total Cost
+                                <span class="fw-bold fs-5 text-info" id="dash-cost">0 đ</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted border-0">
+                                Last Update
+                                <span class="small fw-bold" id="dash-time">--:--:--</span>
+                            </li>
+                        </ul>
+                        <div class="mt-4 text-center">
+                            <button class="btn btn-outline-primary btn-sm w-100" onclick="switchTab('control')">
+                                <i class="fas fa-external-link-alt me-1"></i> Go to Control Panel
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
 
         <div id="tab-control" class="tab-section">
             <h2 class="header-title">Device Control</h2>
@@ -163,6 +239,12 @@
         const db = firebase.database();
         let currentRelayState = 0; let costPerKwh = 3500;
 
+        // Hàm lấy giờ hiện tại (HH:MM:SS) để cập nhật Dashboard
+        function getLocalTimeString() {
+            const now = new Date();
+            return now.toTimeString().split(' ')[0];
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
@@ -170,24 +252,86 @@
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
+        // Khởi tạo Biểu đồ Live Power trên Dashboard
+        const ctxLive = document.getElementById('livePowerChart').getContext('2d');
+        const livePowerChart = new Chart(ctxLive, {
+            type: 'line',
+            data: { 
+                labels: [], 
+                datasets: [{ 
+                    label: 'Power (W)', 
+                    data: [], 
+                    borderColor: '#db2777', 
+                    backgroundColor: 'rgba(219, 39, 119, 0.1)', // Có đổ bóng cho biểu đồ Dashboard
+                    borderWidth: 2, 
+                    fill: true,
+                    tension: 0.4, // Hơi cong mềm mại
+                    pointRadius: 0  // Ẩn các chấm tròn để nhìn giống sóng đang chạy
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                animation: { duration: 0 }, // Tắt hiệu ứng để chạy mượt
+                scales: { 
+                    x: { display: true, grid: { display: false } }, 
+                    y: { beginAtZero: true, grid: { color: '#f0f0f0' } } 
+                }, 
+                plugins: { legend: { display: false } } 
+            }
+        });
+
+        // Đọc dữ liệu tức thời từ Firebase
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
+                // 1. Cập nhật 4 thẻ thông số
                 if(data.voltage !== undefined) document.getElementById('val-v').innerText = data.voltage.toFixed(1);
                 if(data.current !== undefined) document.getElementById('val-i').innerText = data.current.toFixed(2);
                 if(data.power !== undefined) document.getElementById('val-p').innerText = data.power.toFixed(1);
-                if(data.energy !== undefined) document.getElementById('val-e').innerText = data.energy.toFixed(3);
                 
+                let e = 0;
+                if(data.energy !== undefined) {
+                    e = data.energy;
+                    document.getElementById('val-e').innerText = e.toFixed(3);
+                }
+                
+                // 2. Cập nhật Bảng System Overview
+                document.getElementById('dash-time').innerText = getLocalTimeString();
+                document.getElementById('dash-cost').innerText = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
+
+                // 3. Cập nhật Biểu đồ Live (Tối đa 20 điểm)
+                if(data.power !== undefined) {
+                    const timeLabel = getLocalTimeString();
+                    livePowerChart.data.labels.push(timeLabel);
+                    livePowerChart.data.datasets[0].data.push(data.power);
+                    if(livePowerChart.data.labels.length > 20) {
+                        livePowerChart.data.labels.shift();
+                        livePowerChart.data.datasets[0].data.shift();
+                    }
+                    livePowerChart.update();
+                }
+
+                // 4. Cập nhật trạng thái Relay
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
-                    const btn = document.getElementById('btn-relay'); const text = document.getElementById('relay-text'); const status = document.getElementById('status-text');
+                    const btn = document.getElementById('btn-relay'); 
+                    const text = document.getElementById('relay-text'); 
+                    const status = document.getElementById('status-text');
+                    const dashStatus = document.getElementById('dash-sys-status');
                     
                     if(currentRelayState === 1) { 
+                        // Đang Bật
                         btn.className = "btn-relay btn-on"; text.innerText = "ON"; 
                         status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>"; 
+                        dashStatus.className = "badge bg-success rounded-pill px-3 py-2";
+                        dashStatus.innerText = "RUNNING";
                     } else { 
+                        // Đang Tắt
                         btn.className = "btn-relay btn-off"; text.innerText = "OFF"; 
                         status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>"; 
+                        dashStatus.className = "badge bg-danger rounded-pill px-3 py-2";
+                        dashStatus.innerText = "STOPPED";
                     }
                 }
             }
@@ -198,32 +342,15 @@
             db.ref('/control').set(newState); 
         }
 
+        // ===============================================
+        // CÁC BIỂU ĐỒ REPORT VÀ LOG NHƯ CŨ
+        // ===============================================
         Chart.defaults.font.size = 10;
         function initChart(canvasId, label, borderColor) {
             return new Chart(document.getElementById(canvasId).getContext('2d'), {
                 type: 'line',
-                data: { 
-                    labels: [], 
-                    datasets: [{ 
-                        label: label, 
-                        data: [], 
-                        borderColor: borderColor, 
-                        borderWidth: 2, 
-                        fill: false,
-                        tension: 0,
-                        pointRadius: 2,
-                        pointBackgroundColor: borderColor
-                    }] 
-                },
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        x: { display: true, grid: { display: true, color: '#f0f0f0' }, ticks: { maxRotation: 45, minRotation: 45 } }, 
-                        y: { beginAtZero: true, grid: { display: true, color: '#e0e0e0' } } 
-                    }, 
-                    plugins: { legend: { display: false } } 
-                }
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: borderColor, borderWidth: 2, fill: false, tension: 0, pointRadius: 2, pointBackgroundColor: borderColor }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: true, grid: { display: true, color: '#f0f0f0' }, ticks: { maxRotation: 45, minRotation: 45 } }, y: { beginAtZero: true, grid: { display: true, color: '#e0e0e0' } } }, plugins: { legend: { display: false } } }
             });
         }
 
@@ -237,7 +364,11 @@
             if(snapshot.exists()) {
                 const cfg = snapshot.val();
                 if(cfg.max_power) document.getElementById('set-max-power').value = cfg.max_power;
-                if(cfg.cost) { costPerKwh = cfg.cost; document.getElementById('set-cost').value = costPerKwh; }
+                if(cfg.cost) { 
+                    costPerKwh = cfg.cost; 
+                    document.getElementById('set-cost').value = costPerKwh; 
+                    document.getElementById('dash-rate').innerText = costPerKwh;
+                }
             }
         });
 
@@ -271,8 +402,7 @@
                 if(log && log['0_time']) {
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
-                    
-                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 1) : true; 
+                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true; 
                     
                     const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
@@ -283,11 +413,8 @@
                         `<span class="fw-bold" style="color:#0dcaf0;">${costStr}</span>`
                     ];
 
-                    if (isTurnedOn) { 
-                        logTableOn.row.add(rowData).draw(false); 
-                    } else { 
-                        logTableOff.row.add(rowData).draw(false); 
-                    }
+                    if (isTurnedOn) { logTableOn.row.add(rowData).draw(false); } 
+                    else { logTableOff.row.add(rowData).draw(false); }
                 }
             });
         });

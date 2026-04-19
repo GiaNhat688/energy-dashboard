@@ -121,12 +121,8 @@
                     <p class="header-subtitle">Detailed line charts and Paginated Log Tables</p>
                 </div>
                 <div>
-                    <button class="btn btn-success me-2" onclick="exportExcel()">
-                        <i class="fas fa-file-excel me-1"></i> Xuất Excel
-                    </button>
-                    <button class="btn btn-danger" onclick="clearLogs()">
-                        <i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log
-                    </button>
+                    <button class="btn btn-success me-2" onclick="exportExcel()"><i class="fas fa-file-excel me-1"></i> Xuất Excel</button>
+                    <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log</button>
                 </div>
             </div>
             
@@ -226,8 +222,6 @@
         
         let currentRelayState = 0; 
         let costPerKwh = 3500;
-        
-        // SỐ LƯỢNG BẢN GHI TỐI ĐA (FIFO)
         const MAX_LOGS = 100;
 
         function getLocalTimeString() {
@@ -241,7 +235,6 @@
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
-        // Khởi tạo Biểu đồ Live Power
         const ctxLive = document.getElementById('livePowerChart').getContext('2d');
         const livePowerChart = new Chart(ctxLive, {
             type: 'line',
@@ -249,7 +242,6 @@
             options: { responsive: true, maintainAspectRatio: false, animation: { duration: 0 }, scales: { x: { display: true, grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f0f0f0' } } }, plugins: { legend: { display: false } } }
         });
 
-        // Đọc dữ liệu tức thời
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
@@ -378,7 +370,6 @@
                     else { logTableOff.row.add(rowData).draw(false); }
                 }
                 
-                // CƠ CHẾ FIFO
                 db.ref('/logs').once('value').then((snap) => {
                     const count = snap.numChildren();
                     if (count > MAX_LOGS) {
@@ -400,11 +391,7 @@
             }
         }
 
-        // ===============================================
-        // HÀM XUẤT FILE EXCEL MỚI
-        // ===============================================
         function exportExcel() {
-            // Lấy toàn bộ dữ liệu từ thư mục /logs trên Firebase
             db.ref('/logs').once('value').then((snapshot) => {
                 if(!snapshot.exists()) {
                     alert("Không có dữ liệu để xuất!");
@@ -418,7 +405,6 @@
                         const e = log['4_e'] || 0;
                         const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true;
                         
-                        // Đẩy dữ liệu vào mảng với tiêu đề cột bằng Tiếng Việt
                         excelData.push({
                             "Thời gian": log['0_time'],
                             "Trạng thái": isTurnedOn ? "Đang BẬT" : "Đang TẮT",
@@ -431,10 +417,8 @@
                     }
                 });
 
-                // Đảo ngược mảng để dữ liệu mới nhất nằm trên cùng của file Excel
                 excelData.reverse();
 
-                // Dùng thư viện XLSX để tạo và tải file về máy
                 const worksheet = XLSX.utils.json_to_sheet(excelData);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Lich_Su_Do_Dien");

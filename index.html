@@ -12,6 +12,7 @@
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         :root { --primary: #0b1a30; --secondary: #3b82f6; --accent: #ffc107; --bg-color: #f4f7f6; --card-bg: #ffffff; --text-dark: #333333; }
@@ -119,7 +120,14 @@
                     <h2 class="header-title">Analytics Reports</h2>
                     <p class="header-subtitle">Detailed line charts and Paginated Log Tables</p>
                 </div>
-                <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log</button>
+                <div>
+                    <button class="btn btn-success me-2" onclick="exportExcel()">
+                        <i class="fas fa-file-excel me-1"></i> Xuất Excel
+                    </button>
+                    <button class="btn btn-danger" onclick="clearLogs()">
+                        <i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log
+                    </button>
+                </div>
             </div>
             
             <div class="row">
@@ -219,7 +227,7 @@
         let currentRelayState = 0; 
         let costPerKwh = 3500;
         
-        // CÀI ĐẶT SỐ LƯỢNG BẢN GHI TỐI ĐA TRÊN FIREBASE (FIFO Queue)
+        // SỐ LƯỢNG BẢN GHI TỐI ĐA (FIFO)
         const MAX_LOGS = 100;
 
         function getLocalTimeString() {
@@ -293,9 +301,7 @@
             }
         });
 
-        function toggleRelay() { 
-            db.ref('/control').set(currentRelayState === 1 ? 0 : 1); 
-        }
+        function toggleRelay() { db.ref('/control').set(currentRelayState === 1 ? 0 : 1); }
 
         Chart.defaults.font.size = 10;
         function initChart(canvasId, label, borderColor) {
@@ -352,7 +358,6 @@
                 chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
             });
 
-            // Lắng nghe dữ liệu mới và Tự động Dọn dẹp (FIFO)
             db.ref('/logs').on('child_added', (snapshot) => {
                 const log = snapshot.val();
                 if(log && log['0_time']) {
@@ -373,9 +378,7 @@
                     else { logTableOff.row.add(rowData).draw(false); }
                 }
                 
-                // ===============================================
-                // TÍNH NĂNG FIFO: Xóa bản ghi cũ nhất khi vượt quá MAX_LOGS
-                // ===============================================
+                // CƠ CHẾ FIFO
                 db.ref('/logs').once('value').then((snap) => {
                     const count = snap.numChildren();
                     if (count > MAX_LOGS) {
@@ -395,6 +398,51 @@
                     alert("Đã xóa toàn bộ dữ liệu lịch sử thành công!");
                 }).catch((err) => alert("Lỗi khi xóa: " + err));
             }
+        }
+
+        // ===============================================
+        // HÀM XUẤT FILE EXCEL MỚI
+        // ===============================================
+        function exportExcel() {
+            // Lấy toàn bộ dữ liệu từ thư mục /logs trên Firebase
+            db.ref('/logs').once('value').then((snapshot) => {
+                if(!snapshot.exists()) {
+                    alert("Không có dữ liệu để xuất!");
+                    return;
+                }
+
+                let excelData = [];
+                snapshot.forEach((child) => {
+                    const log = child.val();
+                    if(log['0_time']) {
+                        const e = log['4_e'] || 0;
+                        const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true;
+                        
+                        // Đẩy dữ liệu vào mảng với tiêu đề cột bằng Tiếng Việt
+                        excelData.push({
+                            "Thời gian": log['0_time'],
+                            "Trạng thái": isTurnedOn ? "Đang BẬT" : "Đang TẮT",
+                            "Điện áp (V)": log['1_v'] || 0,
+                            "Dòng điện (A)": log['2_i'] || 0,
+                            "Công suất (W)": log['3_p'] || 0,
+                            "Năng lượng (kWh)": e,
+                            "Thành tiền (VNĐ)": Math.round(e * costPerKwh)
+                        });
+                    }
+                });
+
+                // Đảo ngược mảng để dữ liệu mới nhất nằm trên cùng của file Excel
+                excelData.reverse();
+
+                // Dùng thư viện XLSX để tạo và tải file về máy
+                const worksheet = XLSX.utils.json_to_sheet(excelData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Lich_Su_Do_Dien");
+                XLSX.writeFile(workbook, "Bao_Cao_Tieu_Thu_Dien.xlsx");
+
+            }).catch((err) => {
+                alert("Lỗi khi xuất Excel: " + err);
+            });
         }
 
         function saveSettings() {

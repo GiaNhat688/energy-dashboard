@@ -158,16 +158,27 @@
                 if(data.power !== undefined) document.getElementById('val-p').innerText = data.power.toFixed(1);
                 if(data.energy !== undefined) document.getElementById('val-e').innerText = data.energy.toFixed(3);
                 
+                // ĐÃ ĐẢO LOGIC: 1 là ON, 0 là OFF
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
                     const btn = document.getElementById('btn-relay'); const text = document.getElementById('relay-text'); const status = document.getElementById('status-text');
-                    if(currentRelayState === 0) { btn.className = "btn-relay btn-on"; text.innerText = "ON"; status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>"; } 
-                    else { btn.className = "btn-relay btn-off"; text.innerText = "OFF"; status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>"; }
+                    
+                    if(currentRelayState === 1) { 
+                        btn.className = "btn-relay btn-on"; text.innerText = "ON"; 
+                        status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>"; 
+                    } else { 
+                        btn.className = "btn-relay btn-off"; text.innerText = "OFF"; 
+                        status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>"; 
+                    }
                 }
             }
         });
 
-        function toggleRelay() { db.ref('/control').set(currentRelayState === 1 ? 0 : 1); }
+        // ĐÃ ĐẢO LOGIC KHI BẤM NÚT
+        function toggleRelay() { 
+            const newState = currentRelayState === 1 ? 0 : 1;
+            db.ref('/control').set(newState); 
+        }
 
         Chart.defaults.font.size = 10;
         function initChart(canvasId, label, borderColor, bgColor) {
@@ -194,7 +205,6 @@
 
         let logTableOn, logTableOff;
         $(document).ready(function() {
-            // Khởi tạo 2 bảng
             const tableConfig = { order: [[0, 'desc']], pageLength: 5, lengthMenu: [5, 10, 25], language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' } };
             logTableOn = $('#logTableOn').DataTable(tableConfig);
             logTableOff = $('#logTableOff').DataTable(tableConfig);
@@ -218,14 +228,13 @@
                 chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
             });
 
-            // Lắng nghe dữ liệu mới và phân luồng vào 2 bảng
             db.ref('/logs').on('child_added', (snapshot) => {
                 const log = snapshot.val();
                 if(log && log['0_time']) {
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
                     
-                    // Kiểm tra cờ 5_r (nếu không có thì mặc định là ON)
+                    // ĐÃ ĐẢO LOGIC ĐỂ CHIA BẢNG CHUẨN: 1 là ON, 0 là OFF
                     const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 1) : true;
                     
                     const rowData = [

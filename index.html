@@ -146,6 +146,7 @@
 
             <div class="setting-box mt-4" style="border-left: 5px solid #dc3545;">
                 <h5 class="mb-3 text-danger"><i class="fas fa-stop-circle me-2"></i> Log dữ liệu khi đang TẮT (OFF)</h5>
+                <p class="text-muted small"><em>*Lưu ý: Hệ thống hiện tại chỉ lưu log khi đang bật nguồn.</em></p>
                 <table id="logTableOff" class="table table-hover text-center align-middle" style="width:100%">
                     <thead class="table-off">
                         <tr><th>Thời gian</th><th>Điện áp (V)</th><th>Dòng điện (A)</th><th>Công suất (W)</th><th>Năng lượng (kWh)</th><th>Thành tiền (VNĐ)</th></tr>
@@ -276,7 +277,10 @@
                     const status = document.getElementById('status-text');
                     const dashStatus = document.getElementById('dash-sys-status');
                     
-                    if(currentRelayState === 1) { 
+                    // ==========================================
+                    // ĐÃ ĐẢO LOGIC: 0 LÀ ON, 1 LÀ OFF
+                    // ==========================================
+                    if(currentRelayState === 0) { 
                         btn.className = "btn-relay btn-on"; text.innerText = "ON"; 
                         status.className = "mt-4 fs-6 fw-bold text-success";
                         status.innerText = "Hệ thống đang cấp điện"; 
@@ -355,7 +359,11 @@
                 if(log && log['0_time']) {
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
-                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true; 
+                    
+                    // ==========================================
+                    // ĐÃ ĐẢO LOGIC LOG: cờ 5_r bằng 0 nghĩa là ON
+                    // ==========================================
+                    const isTurnedOn = (log['5_r'] === 0); 
                     
                     const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
@@ -403,7 +411,9 @@
                     const log = child.val();
                     if(log['0_time']) {
                         const e = log['4_e'] || 0;
-                        const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true;
+                        
+                        // Đảo logic Excel: cờ 5_r bằng 0 nghĩa là ON
+                        const isTurnedOn = (log['5_r'] === 0);
                         
                         excelData.push({
                             "Thời gian": log['0_time'],

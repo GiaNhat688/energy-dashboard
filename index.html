@@ -215,7 +215,12 @@
         const firebaseConfig = { databaseURL: "https://enerymonitor-37ab9-default-rtdb.asia-southeast1.firebasedatabase.app" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let currentRelayState = 0; let costPerKwh = 3500;
+        
+        let currentRelayState = 0; 
+        let costPerKwh = 3500;
+        
+        // CÀI ĐẶT SỐ LƯỢNG BẢN GHI TỐI ĐA TRÊN FIREBASE (FIFO Queue)
+        const MAX_LOGS = 100;
 
         function getLocalTimeString() {
             return new Date().toTimeString().split(' ')[0];
@@ -307,7 +312,6 @@
         const chartE = initChart('chartE', 'Năng lượng (kWh)', '#198754');
         const chartCost = initChart('chartCost', 'VNĐ', '#0b1a30');
 
-        // Đọc cài đặt
         db.ref('/settings').on('value', (snapshot) => {
             if(snapshot.exists()) {
                 const cfg = snapshot.val();
@@ -348,6 +352,7 @@
                 chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
             });
 
+            // Lắng nghe dữ liệu mới và Tự động Dọn dẹp (FIFO)
             db.ref('/logs').on('child_added', (snapshot) => {
                 const log = snapshot.val();
                 if(log && log['0_time']) {
@@ -367,6 +372,19 @@
                     if (isTurnedOn) { logTableOn.row.add(rowData).draw(false); } 
                     else { logTableOff.row.add(rowData).draw(false); }
                 }
+                
+                // ===============================================
+                // TÍNH NĂNG FIFO: Xóa bản ghi cũ nhất khi vượt quá MAX_LOGS
+                // ===============================================
+                db.ref('/logs').once('value').then((snap) => {
+                    const count = snap.numChildren();
+                    if (count > MAX_LOGS) {
+                        const excess = count - MAX_LOGS;
+                        db.ref('/logs').orderByKey().limitToFirst(excess).once('value', (oldSnaps) => {
+                            oldSnaps.forEach((child) => child.ref.remove());
+                        });
+                    }
+                });
             });
         });
 
@@ -379,7 +397,6 @@
             }
         }
 
-        // Hàm lưu các cài đặt mới
         function saveSettings() {
             db.ref('/settings').set({ 
                 max_power: parseFloat(document.getElementById('set-max-p').value) || 1500,

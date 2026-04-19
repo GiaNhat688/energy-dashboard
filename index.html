@@ -50,7 +50,6 @@
         .dataTables_wrapper .pagination .page-link { border-radius: 5px; margin: 0 3px; }
         table.dataTable { border-collapse: collapse !important; }
         
-        /* Màu cho tiêu đề bảng */
         .table-on th { background-color: #198754 !important; color: white; }
         .table-off th { background-color: #dc3545 !important; color: white; }
     </style>
@@ -83,7 +82,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <h2 class="header-title">Analytics Reports</h2>
-                    <p class="header-subtitle">Historical data charts and Paginated Log Tables</p>
+                    <p class="header-subtitle">Detailed line charts and Paginated Log Tables</p>
                 </div>
                 <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log</button>
             </div>
@@ -158,7 +157,6 @@
                 if(data.power !== undefined) document.getElementById('val-p').innerText = data.power.toFixed(1);
                 if(data.energy !== undefined) document.getElementById('val-e').innerText = data.energy.toFixed(3);
                 
-                // ĐÃ ĐẢO LOGIC: 1 là ON, 0 là OFF
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
                     const btn = document.getElementById('btn-relay'); const text = document.getElementById('relay-text'); const status = document.getElementById('status-text');
@@ -174,26 +172,55 @@
             }
         });
 
-        // ĐÃ ĐẢO LOGIC KHI BẤM NÚT
         function toggleRelay() { 
             const newState = currentRelayState === 1 ? 0 : 1;
             db.ref('/control').set(newState); 
         }
 
+        // ===============================================
+        // CẤU HÌNH LẠI BIỂU ĐỒ (SẮC NÉT, CÓ LƯỚI GRID)
+        // ===============================================
         Chart.defaults.font.size = 10;
-        function initChart(canvasId, label, borderColor, bgColor) {
+        function initChart(canvasId, label, borderColor) {
             return new Chart(document.getElementById(canvasId).getContext('2d'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: label, data: [], borderColor: borderColor, backgroundColor: bgColor, borderWidth: 2, fill: true, tension: 0.3, pointRadius: 2 }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+                data: { 
+                    labels: [], 
+                    datasets: [{ 
+                        label: label, 
+                        data: [], 
+                        borderColor: borderColor, 
+                        borderWidth: 2, 
+                        fill: false,     // Tắt đổ bóng
+                        tension: 0,      // Nét vẽ thẳng gấp khúc (không bo tròn)
+                        pointRadius: 2,  // Hiện chấm tròn nhỏ ở các đỉnh
+                        pointBackgroundColor: borderColor
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { 
+                            display: true, 
+                            grid: { display: true, color: '#f0f0f0' }, // Bật lưới dọc
+                            ticks: { maxRotation: 45, minRotation: 45 } // Xoay chữ thời gian cho đỡ rối
+                        }, 
+                        y: { 
+                            beginAtZero: true,
+                            grid: { display: true, color: '#e0e0e0' } // Bật lưới ngang
+                        } 
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
             });
         }
 
-        const chartV = initChart('chartV', 'Điện áp (V)', '#0dcaf0', 'rgba(13, 202, 240, 0.1)');
-        const chartI = initChart('chartI', 'Dòng điện (A)', '#ffc107', 'rgba(255, 193, 7, 0.1)');
-        const chartP = initChart('chartP', 'Công suất (W)', '#dc3545', 'rgba(220, 53, 69, 0.1)');
-        const chartE = initChart('chartE', 'Năng lượng (kWh)', '#198754', 'rgba(25, 135, 84, 0.1)');
-        const chartCost = initChart('chartCost', 'VNĐ', '#0b1a30', 'rgba(11, 26, 48, 0.1)');
+        const chartV = initChart('chartV', 'Điện áp (V)', '#0dcaf0');
+        const chartI = initChart('chartI', 'Dòng điện (A)', '#ffc107');
+        const chartP = initChart('chartP', 'Công suất (W)', '#dc3545');
+        const chartE = initChart('chartE', 'Năng lượng (kWh)', '#198754');
+        const chartCost = initChart('chartCost', 'VNĐ', '#0b1a30');
 
         db.ref('/settings').on('value', (snapshot) => {
             if(snapshot.exists()) {
@@ -234,8 +261,10 @@
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
                     
-                    // ĐÃ ĐẢO LOGIC ĐỂ CHIA BẢNG CHUẨN: 1 là ON, 0 là OFF
-                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 1) : true;
+                    // ==========================================
+                    // ĐÃ ĐẢO LẠI LOGIC CHIA BẢNG: 0 là ON, 1 là OFF
+                    // ==========================================
+                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true; 
                     
                     const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
@@ -246,8 +275,11 @@
                         `<span class="fw-bold" style="color:#0dcaf0;">${costStr}</span>`
                     ];
 
-                    if (isTurnedOn) { logTableOn.row.add(rowData).draw(false); } 
-                    else { logTableOff.row.add(rowData).draw(false); }
+                    if (isTurnedOn) { 
+                        logTableOn.row.add(rowData).draw(false); 
+                    } else { 
+                        logTableOff.row.add(rowData).draw(false); 
+                    }
                 }
             });
         });

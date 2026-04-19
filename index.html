@@ -38,10 +38,13 @@
         .card-value { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin: 5px 0 0 0; }
         .unit { font-size: 1rem; color: #94a3b8; }
 
-        .relay-control { background: white; padding: 30px; border-radius: 12px; text-align: center; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.03);}
-        .btn-relay { width: 120px; height: 120px; border-radius: 50%; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; }
-        .btn-on { background: linear-gradient(135deg, #10b981, #059669); } .btn-off { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .btn-relay i { font-size: 2.5rem; margin-bottom: 5px; }
+        .relay-control { background: white; padding: 40px; border-radius: 16px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #eaeaea;}
+        .btn-relay { width: 150px; height: 150px; border-radius: 50%; border: none; font-size: 1.4rem; font-weight: bold; color: white; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; box-shadow: 0 15px 25px rgba(0,0,0,0.15); transition: all 0.3s ease; }
+        .btn-on { background: linear-gradient(135deg, #10b981, #059669); } 
+        .btn-off { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .btn-relay i { font-size: 3.5rem; margin-bottom: 8px; }
+        .btn-relay:hover { transform: translateY(-5px); box-shadow: 0 20px 30px rgba(0,0,0,0.2); }
+        .btn-relay:active { transform: scale(0.95); }
 
         .setting-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-weight: 600; color: var(--primary); }
@@ -60,6 +63,7 @@
         <div class="sidebar-brand"><i class="fas fa-bolt"></i> EnergyPro</div>
         <ul class="sidebar-menu">
             <li class="active" id="nav-dashboard" onclick="switchTab('dashboard')"><a><i class="fas fa-chart-line"></i> Dashboard</a></li>
+            <li id="nav-control" onclick="switchTab('control')"><a><i class="fas fa-gamepad"></i> Control</a></li>
             <li id="nav-reports" onclick="switchTab('reports')"><a><i class="fas fa-chart-pie"></i> Reports</a></li>
             <li id="nav-settings" onclick="switchTab('settings')"><a><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
@@ -75,7 +79,24 @@
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #db2777;"><div class="icon-box icon-p"><i class="fas fa-bolt"></i></div><div class="card-title">Active Power</div><h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3></div></div>
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #16a34a;"><div class="icon-box icon-e"><i class="fas fa-leaf"></i></div><div class="card-title">Total Energy</div><h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3></div></div>
             </div>
-            <div class="row"><div class="col-md-6"><div class="relay-control"><h5 class="mb-4 text-secondary text-uppercase fw-bold">Main Power Switch</h5><button id="btn-relay" class="btn-relay btn-off" onclick="toggleRelay()"><i class="fas fa-power-off"></i><span id="relay-text">LOADING</span></button><p class="mt-3 text-muted" id="status-text">Connecting...</p></div></div></div>
+            </div>
+
+        <div id="tab-control" class="tab-section">
+            <h2 class="header-title">Device Control</h2>
+            <p class="header-subtitle">Remote management and operation</p>
+            
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-6 col-lg-5">
+                    <div class="relay-control">
+                        <h4 class="mb-5 text-secondary text-uppercase fw-bold"><i class="fas fa-sliders-h me-2"></i> Main Power Switch</h4>
+                        <button id="btn-relay" class="btn-relay btn-off" onclick="toggleRelay()">
+                            <i class="fas fa-power-off"></i>
+                            <span id="relay-text">LOADING</span>
+                        </button>
+                        <p class="mt-4 fs-5" id="status-text">Connecting to system...</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="tab-reports" class="tab-section">
@@ -177,9 +198,6 @@
             db.ref('/control').set(newState); 
         }
 
-        // ===============================================
-        // CẤU HÌNH LẠI BIỂU ĐỒ (SẮC NÉT, CÓ LƯỚI GRID)
-        // ===============================================
         Chart.defaults.font.size = 10;
         function initChart(canvasId, label, borderColor) {
             return new Chart(document.getElementById(canvasId).getContext('2d'), {
@@ -191,9 +209,9 @@
                         data: [], 
                         borderColor: borderColor, 
                         borderWidth: 2, 
-                        fill: false,     // Tắt đổ bóng
-                        tension: 0,      // Nét vẽ thẳng gấp khúc (không bo tròn)
-                        pointRadius: 2,  // Hiện chấm tròn nhỏ ở các đỉnh
+                        fill: false,
+                        tension: 0,
+                        pointRadius: 2,
                         pointBackgroundColor: borderColor
                     }] 
                 },
@@ -201,15 +219,8 @@
                     responsive: true, 
                     maintainAspectRatio: false, 
                     scales: { 
-                        x: { 
-                            display: true, 
-                            grid: { display: true, color: '#f0f0f0' }, // Bật lưới dọc
-                            ticks: { maxRotation: 45, minRotation: 45 } // Xoay chữ thời gian cho đỡ rối
-                        }, 
-                        y: { 
-                            beginAtZero: true,
-                            grid: { display: true, color: '#e0e0e0' } // Bật lưới ngang
-                        } 
+                        x: { display: true, grid: { display: true, color: '#f0f0f0' }, ticks: { maxRotation: 45, minRotation: 45 } }, 
+                        y: { beginAtZero: true, grid: { display: true, color: '#e0e0e0' } } 
                     }, 
                     plugins: { legend: { display: false } } 
                 }
@@ -261,10 +272,7 @@
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
                     
-                    // ==========================================
-                    // ĐÃ ĐẢO LẠI LOGIC CHIA BẢNG: 0 là ON, 1 là OFF
-                    // ==========================================
-                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 0) : true; 
+                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 1) : true; 
                     
                     const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,

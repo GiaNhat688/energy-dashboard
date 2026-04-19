@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergyPro IoT Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #0b1a30;
+            --secondary: #3b82f6;
+            --accent: #ffc107;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #333333;
+        }
+
+        body { background-color: var(--bg-color); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; margin: 0; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background-color: var(--primary); color: white; display: flex; flex-direction: column; transition: 0.3s; }
+        .sidebar-brand { padding: 25px 20px; font-size: 1.5rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-menu { list-style: none; padding: 0; margin: 20px 0; }
+        .sidebar-menu li { margin-bottom: 5px; }
+        .sidebar-menu li a { display: flex; align-items: center; padding: 15px 25px; color: #a0aec0; text-decoration: none; font-weight: 500; transition: 0.3s; cursor: pointer; }
+        .sidebar-menu li a i { width: 25px; font-size: 1.1rem; }
+        .sidebar-menu li a:hover, .sidebar-menu li.active a { background-color: rgba(255,255,255,0.05); color: white; border-left: 4px solid var(--secondary); }
+        
+        /* MAIN CONTENT */
+        .main-content { flex-grow: 1; padding: 30px 40px; overflow-y: auto; }
+        .header-title { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
+        .header-subtitle { color: #6c757d; margin-bottom: 30px; font-size: 0.95rem; }
+
+        /* TAB SYSTEM */
+        .tab-section { display: none; animation: fadeIn 0.4s; }
+        .tab-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .data-card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border: none; height: 100%; border-bottom: 4px solid var(--secondary); transition: transform 0.2s; }
+        .data-card:hover { transform: translateY(-5px); }
+        .data-card .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px; }
+        .icon-v { background: #e0f2fe; color: #0284c7; }
+        .icon-i { background: #fef08a; color: #ca8a04; }
+        .icon-p { background: #fce7f3; color: #db2777; }
+        .icon-e { background: #dcfce7; color: #16a34a; }
+        .card-title { font-size: 0.9rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+        .card-value { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin: 5px 0 0 0; }
+        .unit { font-size: 1rem; font-weight: 500; color: #94a3b8; }
+
+        /* RELAY BUTTON */
+        .relay-control { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); text-align: center; }
+        .btn-relay { width: 120px; height: 120px; border-radius: 50%; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto; }
+        .btn-on { background: linear-gradient(135deg, #10b981, #059669); }
+        .btn-off { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .btn-relay i { font-size: 2.5rem; margin-bottom: 5px; }
+        .btn-relay:active { transform: scale(0.95); }
+
+        /* SETTINGS FORM */
+        .setting-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .setting-box h5 { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-weight: 600; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-bolt"></i> EnergyPro</div>
+        <ul class="sidebar-menu">
+            <li class="active" id="nav-dashboard" onclick="switchTab('dashboard')">
+                <a><i class="fas fa-chart-line"></i> Dashboard</a>
+            </li>
+            <li id="nav-settings" onclick="switchTab('settings')">
+                <a><i class="fas fa-cog"></i> Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="tab-dashboard" class="tab-section active">
+            <h2 class="header-title">Live Dashboard</h2>
+            <p class="header-subtitle">Real-time energy monitoring</p>
+
+            <div class="row g-4 mb-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #0284c7;">
+                        <div class="icon-box icon-v"><i class="fas fa-plug"></i></div>
+                        <div class="card-title">Voltage</div>
+                        <h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #ca8a04;">
+                        <div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div>
+                        <div class="card-title">Current</div>
+                        <h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #db2777;">
+                        <div class="icon-box icon-p"><i class="fas fa-bolt"></i></div>
+                        <div class="card-title">Active Power</div>
+                        <h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="data-card" style="border-bottom-color: #16a34a;">
+                        <div class="icon-box icon-e"><i class="fas fa-leaf"></i></div>
+                        <div class="card-title">Total Energy</div>
+                        <h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="relay-control">
+                        <h5 class="mb-4 text-secondary text-uppercase fw-bold">Main Power Switch</h5>
+                        <button id="btn-relay" class="btn-relay btn-off" onclick="toggleRelay()">
+                            <i class="fas fa-power-off"></i>
+                            <span id="relay-text">LOADING</span>
+                        </button>
+                        <p class="mt-3 text-muted" id="status-text">Connecting to system...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-settings" class="tab-section">
+            <h2 class="header-title">System Settings</h2>
+            <p class="header-subtitle">Configure thresholds and system protection parameters</p>
+
+            <div class="setting-box">
+                <h5><i class="fas fa-shield-alt text-warning me-2"></i> Safety Protection</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted fw-bold">Max Power Cutoff (W)</label>
+                        <div class="input-group">
+                            <input type="number" id="set-max-power" class="form-control" placeholder="e.g. 1500">
+                            <span class="input-group-text">W</span>
+                        </div>
+                        <small class="text-danger">Relay will automatically turn off if power exceeds this value.</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted fw-bold">Electricity Cost</label>
+                        <div class="input-group">
+                            <input type="number" id="set-cost" class="form-control" placeholder="e.g. 3500">
+                            <span class="input-group-text">VNĐ/kWh</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3 px-4" onclick="saveSettings()">
+                    <i class="fas fa-save me-2"></i> Save Configurations
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // ================= 1. CẤU HÌNH FIREBASE =================
+        // THAY ĐƯỜNG LINK DATABASE CỦA BẠN VÀO ĐÂY
+        const firebaseConfig = {
+            databaseURL: "https://enerymonitor-37ab9-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let currentRelayState = 0; // 0=OFF, 1=ON
+
+        // ================= 2. CHUYỂN TAB GIAO DIỆN =================
+        function switchTab(tabName) {
+            // Đổi màu Sidebar
+            document.getElementById('nav-dashboard').classList.remove('active');
+            document.getElementById('nav-settings').classList.remove('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+
+            // Ẩn/Hiện Nội dung
+            document.getElementById('tab-dashboard').classList.remove('active');
+            document.getElementById('tab-settings').classList.remove('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        // ================= 3. ĐỌC DỮ LIỆU REALTIME =================
+        // Lắng nghe thay đổi liên tục từ Firebase
+        db.ref('/').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                // Cập nhật số liệu Dashboard
+                if(data.voltage !== undefined) document.getElementById('val-v').innerText = data.voltage.toFixed(1);
+                if(data.current !== undefined) document.getElementById('val-i').innerText = data.current.toFixed(2);
+                if(data.power !== undefined) document.getElementById('val-p').innerText = data.power.toFixed(1);
+                if(data.energy !== undefined) document.getElementById('val-e').innerText = data.energy.toFixed(3);
+                
+                // Cập nhật nút Relay
+                if(data.control !== undefined) {
+                    currentRelayState = data.control;
+                    const btn = document.getElementById('btn-relay');
+                    const text = document.getElementById('relay-text');
+                    const status = document.getElementById('status-text');
+
+                    if(currentRelayState === 1) {
+                        btn.className = "btn-relay btn-on";
+                        text.innerText = "ON";
+                        status.innerHTML = "<span class='text-success fw-bold'><i class='fas fa-circle'></i> System is running</span>";
+                    } else {
+                        btn.className = "btn-relay btn-off";
+                        text.innerText = "OFF";
+                        status.innerHTML = "<span class='text-danger fw-bold'><i class='fas fa-circle'></i> System is stopped</span>";
+                    }
+                }
+            }
+        });
+
+        // ================= 4. ĐIỀU KHIỂN RELAY =================
+        function toggleRelay() {
+            const newState = currentRelayState === 1 ? 0 : 1;
+            db.ref('/control').set(newState)
+                .then(() => console.log("Lệnh đã gửi: " + newState))
+                .catch((err) => alert("Lỗi điều khiển: " + err));
+        }
+
+        // ================= 5. CÀI ĐẶT NGƯỠNG (SETTINGS) =================
+        // Đọc cài đặt khi vừa vào trang
+        db.ref('/settings').once('value').then((snapshot) => {
+            if(snapshot.exists()) {
+                const cfg = snapshot.val();
+                if(cfg.max_power) document.getElementById('set-max-power').value = cfg.max_power;
+                if(cfg.cost) document.getElementById('set-cost').value = cfg.cost;
+            }
+        });
+
+        // Lưu cài đặt
+        function saveSettings() {
+            const maxP = parseFloat(document.getElementById('set-max-power').value);
+            const cost = parseFloat(document.getElementById('set-cost').value);
+
+            db.ref('/settings').set({
+                max_power: maxP,
+                cost: cost
+            }).then(() => {
+                alert("Settings saved successfully!");
+            }).catch((err) => {
+                alert("Error: " + err);
+            });
+        }
+    </script>
+</body>
+</html>

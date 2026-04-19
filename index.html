@@ -16,7 +16,6 @@
     <style>
         :root { --primary: #0b1a30; --secondary: #3b82f6; --accent: #ffc107; --bg-color: #f4f7f6; --card-bg: #ffffff; --text-dark: #333333; }
         body { background-color: var(--bg-color); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; margin: 0; }
-        
         .sidebar { width: 260px; background-color: var(--primary); color: white; display: flex; flex-direction: column; transition: 0.3s; }
         .sidebar-brand { padding: 25px 20px; font-size: 1.5rem; font-weight: bold; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); }
         .sidebar-menu { list-style: none; padding: 0; margin: 20px 0; }
@@ -50,6 +49,10 @@
         
         .dataTables_wrapper .pagination .page-link { border-radius: 5px; margin: 0 3px; }
         table.dataTable { border-collapse: collapse !important; }
+        
+        /* Màu cho tiêu đề bảng */
+        .table-on th { background-color: #198754 !important; color: white; }
+        .table-off th { background-color: #dc3545 !important; color: white; }
     </style>
 </head>
 <body>
@@ -77,7 +80,14 @@
         </div>
 
         <div id="tab-reports" class="tab-section">
-            <h2 class="header-title">Analytics Reports</h2><p class="header-subtitle">Historical data charts and Paginated Log Table</p>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h2 class="header-title">Analytics Reports</h2>
+                    <p class="header-subtitle">Historical data charts and Paginated Log Tables</p>
+                </div>
+                <button class="btn btn-danger" onclick="clearLogs()"><i class="fas fa-trash-alt me-1"></i> Xóa toàn bộ Log</button>
+            </div>
+            
             <div class="row">
                 <div class="col-lg-4 col-md-6"><div class="setting-box"><h6><i class="fas fa-plug text-info me-2"></i> Điện áp (V)</h6><div class="chart-container"><canvas id="chartV"></canvas></div></div></div>
                 <div class="col-lg-4 col-md-6"><div class="setting-box"><h6><i class="fas fa-wave-square text-warning me-2"></i> Dòng điện (A)</h6><div class="chart-container"><canvas id="chartI"></canvas></div></div></div>
@@ -86,22 +96,24 @@
                 <div class="col-lg-6 col-md-6"><div class="setting-box"><h6><i class="fas fa-money-bill-wave" style="color: #0dcaf0;"></i> Chi phí ước tính (VNĐ)</h6><div class="chart-container"><canvas id="chartCost"></canvas></div></div></div>
             </div>
 
-            <div class="setting-box mt-2">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="mb-0"><i class="fas fa-table text-secondary me-2"></i> Bảng dữ liệu tự động phân trang</h5>
-                    <button class="btn btn-danger btn-sm" onclick="clearLogs()">
-                        <i class="fas fa-trash-alt me-1"></i> Xóa dữ liệu cũ
-                    </button>
-                </div>
-                <table id="logTable" class="table table-hover text-center align-middle" style="width:100%">
-                    <thead class="table-dark">
+            <div class="setting-box mt-2" style="border-left: 5px solid #198754;">
+                <h5 class="mb-3 text-success"><i class="fas fa-play-circle me-2"></i> Log dữ liệu khi đang BẬT (ON)</h5>
+                <table id="logTableOn" class="table table-hover text-center align-middle" style="width:100%">
+                    <thead class="table-on">
                         <tr>
-                            <th>Thời gian</th>
-                            <th>Điện áp (V)</th>
-                            <th>Dòng điện (A)</th>
-                            <th>Công suất (W)</th>
-                            <th>Năng lượng (kWh)</th>
-                            <th>Thành tiền (VNĐ)</th>
+                            <th>Thời gian</th><th>Điện áp (V)</th><th>Dòng điện (A)</th><th>Công suất (W)</th><th>Năng lượng (kWh)</th><th>Thành tiền (VNĐ)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="setting-box mt-4" style="border-left: 5px solid #dc3545;">
+                <h5 class="mb-3 text-danger"><i class="fas fa-stop-circle me-2"></i> Log dữ liệu khi đang TẮT (OFF)</h5>
+                <table id="logTableOff" class="table table-hover text-center align-middle" style="width:100%">
+                    <thead class="table-off">
+                        <tr>
+                            <th>Thời gian</th><th>Điện áp (V)</th><th>Dòng điện (A)</th><th>Công suất (W)</th><th>Năng lượng (kWh)</th><th>Thành tiền (VNĐ)</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -149,8 +161,8 @@
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
                     const btn = document.getElementById('btn-relay'); const text = document.getElementById('relay-text'); const status = document.getElementById('status-text');
-                    if(currentRelayState === 0) { btn.className = "btn-relay btn-on"; text.innerText = "ON"; status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện (Đang lưu Log)</span>"; } 
-                    else { btn.className = "btn-relay btn-off"; text.innerText = "OFF"; status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt (Đã dừng Log)</span>"; }
+                    if(currentRelayState === 0) { btn.className = "btn-relay btn-on"; text.innerText = "ON"; status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>"; } 
+                    else { btn.className = "btn-relay btn-off"; text.innerText = "OFF"; status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>"; }
                 }
             }
         });
@@ -180,17 +192,13 @@
             }
         });
 
-        // Khởi tạo Bảng
-        let logTable;
+        let logTableOn, logTableOff;
         $(document).ready(function() {
-            logTable = $('#logTable').DataTable({
-                order: [[0, 'desc']], // Luôn xếp dòng mới nhất lên đầu bảng
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 50],
-                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' }
-            });
+            // Khởi tạo 2 bảng
+            const tableConfig = { order: [[0, 'desc']], pageLength: 5, lengthMenu: [5, 10, 25], language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/vi.json' } };
+            logTableOn = $('#logTableOn').DataTable(tableConfig);
+            logTableOff = $('#logTableOff').DataTable(tableConfig);
 
-            // Lắng nghe dữ liệu mới để vẽ BIỂU ĐỒ (Chỉ lấy 15 cái mới nhất)
             db.ref('/logs').limitToLast(15).on('value', (snapshot) => {
                 const labels=[], dataV=[], dataI=[], dataP=[], dataE=[], dataCost=[];
                 if(snapshot.exists()) {
@@ -210,29 +218,35 @@
                 chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
             });
 
-            // Lắng nghe từng dòng để nạp vào BẢNG (Nhỏ giọt từng dòng mượt mà)
+            // Lắng nghe dữ liệu mới và phân luồng vào 2 bảng
             db.ref('/logs').on('child_added', (snapshot) => {
                 const log = snapshot.val();
                 if(log && log['0_time']) {
                     const e = log['4_e'] || 0;
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
-                    logTable.row.add([
+                    
+                    // Kiểm tra cờ 5_r (nếu không có thì mặc định là ON)
+                    const isTurnedOn = (log['5_r'] !== undefined) ? (log['5_r'] === 1) : true;
+                    
+                    const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
                         log['1_v'] !== undefined ? log['1_v'].toFixed(1) : '-',
                         log['2_i'] !== undefined ? log['2_i'].toFixed(2) : '-',
                         `<span class="fw-bold text-danger">${log['3_p'] !== undefined ? log['3_p'].toFixed(1) : '-'}</span>`,
                         `<span class="text-success">${e.toFixed(3)}</span>`,
                         `<span class="fw-bold" style="color:#0dcaf0;">${costStr}</span>`
-                    ]).draw(false);
+                    ];
+
+                    if (isTurnedOn) { logTableOn.row.add(rowData).draw(false); } 
+                    else { logTableOff.row.add(rowData).draw(false); }
                 }
             });
         });
 
-        // HÀM XÓA DỮ LIỆU
         function clearLogs() {
             if(confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu lịch sử không? Hành động này không thể hoàn tác.")) {
                 db.ref('/logs').remove().then(() => {
-                    logTable.clear().draw(); // Xóa sạch bảng
+                    logTableOn.clear().draw(); logTableOff.clear().draw();
                     alert("Đã xóa toàn bộ dữ liệu lịch sử thành công!");
                 }).catch((err) => alert("Lỗi khi xóa: " + err));
             }

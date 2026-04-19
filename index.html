@@ -17,7 +17,6 @@
             --card-bg: #ffffff;
             --text-dark: #333333;
         }
-
         body { background-color: var(--bg-color); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; margin: 0; }
         
         /* SIDEBAR */
@@ -33,13 +32,11 @@
         .main-content { flex-grow: 1; padding: 30px 40px; overflow-y: auto; }
         .header-title { font-size: 1.8rem; font-weight: 700; color: var(--primary); margin-bottom: 5px; }
         .header-subtitle { color: #6c757d; margin-bottom: 30px; font-size: 0.95rem; }
-
-        /* TAB SYSTEM */
         .tab-section { display: none; animation: fadeIn 0.4s; }
         .tab-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS */
+        /* DASHBOARD CARDS */
         .data-card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border: none; height: 100%; border-bottom: 4px solid var(--secondary); transition: transform 0.2s; }
         .data-card:hover { transform: translateY(-5px); }
         .data-card .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px; }
@@ -59,10 +56,11 @@
         .btn-relay i { font-size: 2.5rem; margin-bottom: 5px; }
         .btn-relay:active { transform: scale(0.95); }
 
-        /* SETTINGS & REPORTS FORM */
-        .setting-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
-        .setting-box h5 { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; font-weight: 600; color: var(--primary); }
-        .table-responsive { max-height: 300px; overflow-y: auto; }
+        /* CHARTS & TABLES */
+        .setting-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        .setting-box h5, .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-weight: 600; color: var(--primary); }
+        .chart-container { position: relative; height: 180px; width: 100%; }
+        .table-responsive { max-height: 250px; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -74,7 +72,7 @@
                 <a><i class="fas fa-chart-line"></i> Dashboard</a>
             </li>
             <li id="nav-reports" onclick="switchTab('reports')">
-                <a><i class="fas fa-chart-bar"></i> Reports</a>
+                <a><i class="fas fa-chart-pie"></i> Reports</a>
             </li>
             <li id="nav-settings" onclick="switchTab('settings')">
                 <a><i class="fas fa-cog"></i> Settings</a>
@@ -89,74 +87,77 @@
             <p class="header-subtitle">Real-time energy monitoring</p>
 
             <div class="row g-4 mb-4">
-                <div class="col-xl-3 col-md-6">
-                    <div class="data-card" style="border-bottom-color: #0284c7;">
-                        <div class="icon-box icon-v"><i class="fas fa-plug"></i></div>
-                        <div class="card-title">Voltage</div>
-                        <h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="data-card" style="border-bottom-color: #ca8a04;">
-                        <div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div>
-                        <div class="card-title">Current</div>
-                        <h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="data-card" style="border-bottom-color: #db2777;">
-                        <div class="icon-box icon-p"><i class="fas fa-bolt"></i></div>
-                        <div class="card-title">Active Power</div>
-                        <h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="data-card" style="border-bottom-color: #16a34a;">
-                        <div class="icon-box icon-e"><i class="fas fa-leaf"></i></div>
-                        <div class="card-title">Total Energy</div>
-                        <h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3>
-                    </div>
-                </div>
+                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #0284c7;"><div class="icon-box icon-v"><i class="fas fa-plug"></i></div><div class="card-title">Voltage</div><h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3></div></div>
+                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #ca8a04;"><div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div><div class="card-title">Current</div><h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3></div></div>
+                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #db2777;"><div class="icon-box icon-p"><i class="fas fa-bolt"></i></div><div class="card-title">Active Power</div><h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3></div></div>
+                <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #16a34a;"><div class="icon-box icon-e"><i class="fas fa-leaf"></i></div><div class="card-title">Total Energy</div><h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3></div></div>
             </div>
 
             <div class="row">
                 <div class="col-md-6">
                     <div class="relay-control">
                         <h5 class="mb-4 text-secondary text-uppercase fw-bold">Main Power Switch</h5>
-                        <button id="btn-relay" class="btn-relay btn-off" onclick="toggleRelay()">
-                            <i class="fas fa-power-off"></i>
-                            <span id="relay-text">LOADING</span>
-                        </button>
-                        <p class="mt-3 text-muted" id="status-text">Connecting to system...</p>
+                        <button id="btn-relay" class="btn-relay btn-off" onclick="toggleRelay()"><i class="fas fa-power-off"></i><span id="relay-text">LOADING</span></button>
+                        <p class="mt-3 text-muted" id="status-text">Connecting...</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="tab-reports" class="tab-section">
-            <h2 class="header-title">Energy Reports</h2>
-            <p class="header-subtitle">Historical data and power consumption chart</p>
+            <h2 class="header-title">Analytics Reports</h2>
+            <p class="header-subtitle">Detailed multi-metric historical charts (Last 15 records)</p>
 
-            <div class="setting-box">
-                <h5><i class="fas fa-chart-area text-primary me-2"></i> Power Consumption Chart (Last 15 records)</h5>
-                <canvas id="powerChart" height="80"></canvas>
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="setting-box">
+                        <h6><i class="fas fa-plug text-info me-2"></i> Điện áp (V)</h6>
+                        <div class="chart-container"><canvas id="chartV"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="setting-box">
+                        <h6><i class="fas fa-wave-square text-warning me-2"></i> Dòng điện (A)</h6>
+                        <div class="chart-container"><canvas id="chartI"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="setting-box">
+                        <h6><i class="fas fa-bolt text-danger me-2"></i> Công suất (W)</h6>
+                        <div class="chart-container"><canvas id="chartP"></canvas></div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 col-md-6">
+                    <div class="setting-box">
+                        <h6><i class="fas fa-leaf text-success me-2"></i> Năng lượng (kWh)</h6>
+                        <div class="chart-container"><canvas id="chartE"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6">
+                    <div class="setting-box">
+                        <h6><i class="fas fa-money-bill-wave" style="color: #0dcaf0;"></i> Chi phí ước tính (VNĐ)</h6>
+                        <div class="chart-container"><canvas id="chartCost"></canvas></div>
+                    </div>
+                </div>
             </div>
 
-            <div class="setting-box">
-                <h5><i class="fas fa-table text-success me-2"></i> Detailed Data Log</h5>
+            <div class="setting-box mt-2">
+                <h5><i class="fas fa-table text-secondary me-2"></i> Detailed Data Log</h5>
                 <div class="table-responsive">
                     <table class="table table-hover text-center align-middle">
                         <thead class="table-dark">
                             <tr>
-                                <th>Time</th>
-                                <th>Voltage (V)</th>
-                                <th>Current (A)</th>
-                                <th>Power (W)</th>
-                                <th>Energy (kWh)</th>
+                                <th>Thời gian</th>
+                                <th>Điện áp (V)</th>
+                                <th>Dòng điện (A)</th>
+                                <th>Công suất (W)</th>
+                                <th>Năng lượng (kWh)</th>
+                                <th>Thành tiền (VNĐ)</th>
                             </tr>
                         </thead>
                         <tbody id="log-table-body">
-                            <tr><td colspan="5">Loading data from Firebase...</td></tr>
+                            <tr><td colspan="6">Đang tải dữ liệu từ Firebase...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -166,29 +167,25 @@
         <div id="tab-settings" class="tab-section">
             <h2 class="header-title">System Settings</h2>
             <p class="header-subtitle">Configure thresholds and system protection parameters</p>
-
             <div class="setting-box">
                 <h5><i class="fas fa-shield-alt text-warning me-2"></i> Safety Protection</h5>
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label text-muted fw-bold">Max Power Cutoff (W)</label>
+                        <label class="form-label text-muted fw-bold">Ngưỡng ngắt quá tải (W)</label>
                         <div class="input-group">
-                            <input type="number" id="set-max-power" class="form-control" placeholder="e.g. 1500">
+                            <input type="number" id="set-max-power" class="form-control" placeholder="1500">
                             <span class="input-group-text">W</span>
                         </div>
-                        <small class="text-danger">Relay will automatically turn off if power exceeds this value.</small>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label text-muted fw-bold">Electricity Cost</label>
+                        <label class="form-label text-muted fw-bold">Đơn giá điện</label>
                         <div class="input-group">
-                            <input type="number" id="set-cost" class="form-control" placeholder="e.g. 3500">
+                            <input type="number" id="set-cost" class="form-control" placeholder="3500">
                             <span class="input-group-text">VNĐ/kWh</span>
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary mt-3 px-4" onclick="saveSettings()">
-                    <i class="fas fa-save me-2"></i> Save Configurations
-                </button>
+                <button class="btn btn-primary mt-3 px-4" onclick="saveSettings()">Lưu cài đặt</button>
             </div>
         </div>
 
@@ -198,134 +195,136 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // ================= 1. CẤU HÌNH FIREBASE =================
+        // 1. KẾT NỐI FIREBASE
         const firebaseConfig = {
             databaseURL: "https://enerymonitor-37ab9-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
+        
         let currentRelayState = 0;
+        let costPerKwh = 3500; // Giá điện mặc định
 
-        // ================= 2. CHUYỂN TAB GIAO DIỆN =================
+        // 2. HÀM CHUYỂN TAB
         function switchTab(tabName) {
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
-            
             document.getElementById('nav-' + tabName).classList.add('active');
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
-        // ================= 3. ĐỌC DỮ LIỆU REALTIME & NÚT BẤM =================
+        // 3. ĐỌC DỮ LIỆU TỨC THỜI
         db.ref('/').on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
-                // Dashboard
                 if(data.voltage !== undefined) document.getElementById('val-v').innerText = data.voltage.toFixed(1);
                 if(data.current !== undefined) document.getElementById('val-i').innerText = data.current.toFixed(2);
                 if(data.power !== undefined) document.getElementById('val-p').innerText = data.power.toFixed(1);
                 if(data.energy !== undefined) document.getElementById('val-e').innerText = data.energy.toFixed(3);
                 
-                // ĐÃ SỬA LỖI NGƯỢC RELAY TẠI ĐÂY (0 là ON, 1 là OFF)
+                // Cập nhật Relay (0 là BẬT, 1 là TẮT)
                 if(data.control !== undefined) {
                     currentRelayState = data.control;
                     const btn = document.getElementById('btn-relay');
                     const text = document.getElementById('relay-text');
                     const status = document.getElementById('status-text');
-
-                    if(currentRelayState === 0) { // 0 = BẬT cho Relay Active-Low
-                        btn.className = "btn-relay btn-on";
-                        text.innerText = "ON";
-                        status.innerHTML = "<span class='text-success fw-bold'><i class='fas fa-circle'></i> System is running</span>";
-                    } else { // 1 = TẮT
-                        btn.className = "btn-relay btn-off";
-                        text.innerText = "OFF";
-                        status.innerHTML = "<span class='text-danger fw-bold'><i class='fas fa-circle'></i> System is stopped</span>";
+                    if(currentRelayState === 0) {
+                        btn.className = "btn-relay btn-on"; text.innerText = "ON";
+                        status.innerHTML = "<span class='text-success fw-bold'>Hệ thống đang cấp điện</span>";
+                    } else {
+                        btn.className = "btn-relay btn-off"; text.innerText = "OFF";
+                        status.innerHTML = "<span class='text-danger fw-bold'>Hệ thống đang ngắt</span>";
                     }
                 }
             }
         });
 
-        // ================= 4. ĐIỀU KHIỂN RELAY =================
+        // 4. ĐIỀU KHIỂN RELAY
         function toggleRelay() {
             const newState = currentRelayState === 1 ? 0 : 1;
-            db.ref('/control').set(newState)
-                .then(() => console.log("Lệnh điều khiển: " + newState))
-                .catch((err) => alert("Lỗi: " + err));
+            db.ref('/control').set(newState);
         }
 
-        // ================= 5. TẠO BIỂU ĐỒ BÁO CÁO (CHART.JS) =================
-        const ctx = document.getElementById('powerChart').getContext('2d');
-        const powerChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Power (W)',
-                    data: [],
-                    borderColor: '#db2777',
-                    backgroundColor: 'rgba(219, 39, 119, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: '#db2777'
-                }]
-            },
-            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        // 5. CẤU HÌNH BIỂU ĐỒ (CHART.JS)
+        Chart.defaults.font.size = 10;
+        // Hàm tạo nhanh một biểu đồ
+        function initChart(canvasId, label, borderColor, bgColor) {
+            return new Chart(document.getElementById(canvasId).getContext('2d'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: label, data: [], borderColor: borderColor, backgroundColor: bgColor, borderWidth: 2, fill: true, tension: 0.3, pointRadius: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+            });
+        }
+
+        const chartV = initChart('chartV', 'Điện áp (V)', '#0dcaf0', 'rgba(13, 202, 240, 0.1)');
+        const chartI = initChart('chartI', 'Dòng điện (A)', '#ffc107', 'rgba(255, 193, 7, 0.1)');
+        const chartP = initChart('chartP', 'Công suất (W)', '#dc3545', 'rgba(220, 53, 69, 0.1)');
+        const chartE = initChart('chartE', 'Năng lượng (kWh)', '#198754', 'rgba(25, 135, 84, 0.1)');
+        const chartCost = initChart('chartCost', 'VNĐ', '#0b1a30', 'rgba(11, 26, 48, 0.1)');
+
+        // 6. LẤY CÀI ĐẶT & VẼ BIỂU ĐỒ LOG
+        db.ref('/settings').on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                const cfg = snapshot.val();
+                if(cfg.max_power) document.getElementById('set-max-power').value = cfg.max_power;
+                if(cfg.cost) {
+                    costPerKwh = cfg.cost;
+                    document.getElementById('set-cost').value = costPerKwh;
+                }
+            }
         });
 
-        // ================= 6. ĐỌC DỮ LIỆU LOG TỪ FIREBASE =================
-        // Chỉ lấy 15 bản ghi mới nhất để vẽ biểu đồ và hiển thị bảng
         db.ref('/logs').limitToLast(15).on('value', (snapshot) => {
-            const labels = [];
-            const dataP = [];
+            const labels=[], dataV=[], dataI=[], dataP=[], dataE=[], dataCost=[];
             let tableHTML = '';
-            
-            // Đưa dữ liệu vào mảng để đảo ngược (hiển thị mới nhất lên đầu bảng)
             const logsArray = [];
             snapshot.forEach((child) => logsArray.push(child.val()));
 
-            // Vẽ biểu đồ (cũ đến mới)
+            // Nạp dữ liệu vào biểu đồ
             logsArray.forEach(log => {
                 if(log['0_time']) {
-                    const timeOnly = log['0_time'].split(' ')[1] || log['0_time']; // Chỉ lấy giờ:phút:giây
+                    const timeOnly = log['0_time'].split(' ')[1] || log['0_time'];
                     labels.push(timeOnly);
-                    dataP.push(log['3_p']);
+                    dataV.push(log['1_v'] || 0);
+                    dataI.push(log['2_i'] || 0);
+                    dataP.push(log['3_p'] || 0);
+                    const e = log['4_e'] || 0;
+                    dataE.push(e);
+                    dataCost.push((e * costPerKwh).toFixed(0)); // Tính tiền
                 }
             });
-            powerChart.data.labels = labels;
-            powerChart.data.datasets[0].data = dataP;
-            powerChart.update();
 
-            // Vẽ Bảng (mới nhất lên đầu)
+            chartV.data.labels = labels; chartV.data.datasets[0].data = dataV; chartV.update();
+            chartI.data.labels = labels; chartI.data.datasets[0].data = dataI; chartI.update();
+            chartP.data.labels = labels; chartP.data.datasets[0].data = dataP; chartP.update();
+            chartE.data.labels = labels; chartE.data.datasets[0].data = dataE; chartE.update();
+            chartCost.data.labels = labels; chartCost.data.datasets[0].data = dataCost; chartCost.update();
+
+            // Nạp dữ liệu vào bảng
             logsArray.reverse().forEach(log => {
+                const e = log['4_e'] || 0;
+                const cost = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ'; // Format tiền Việt Nam
+                
                 tableHTML += `<tr>
                     <td class="fw-bold text-primary">${log['0_time'] || '-'}</td>
                     <td>${log['1_v'] !== undefined ? log['1_v'].toFixed(1) : '-'}</td>
                     <td>${log['2_i'] !== undefined ? log['2_i'].toFixed(2) : '-'}</td>
                     <td class="fw-bold text-danger">${log['3_p'] !== undefined ? log['3_p'].toFixed(1) : '-'}</td>
-                    <td class="text-success">${log['4_e'] !== undefined ? log['4_e'].toFixed(3) : '-'}</td>
+                    <td class="text-success">${e.toFixed(3)}</td>
+                    <td class="fw-bold" style="color:#0dcaf0;">${cost}</td>
                 </tr>`;
             });
             
-            if(tableHTML === '') tableHTML = '<tr><td colspan="5">Chưa có dữ liệu log. Hãy đợi ESP32 đẩy dữ liệu lên...</td></tr>';
+            if(tableHTML === '') tableHTML = '<tr><td colspan="6">Đang tải...</td></tr>';
             document.getElementById('log-table-body').innerHTML = tableHTML;
         });
 
-        // ================= 7. CÀI ĐẶT NGƯỠNG =================
-        db.ref('/settings').once('value').then((snapshot) => {
-            if(snapshot.exists()) {
-                const cfg = snapshot.val();
-                if(cfg.max_power) document.getElementById('set-max-power').value = cfg.max_power;
-                if(cfg.cost) document.getElementById('set-cost').value = cfg.cost;
-            }
-        });
-
+        // 7. LƯU CÀI ĐẶT MỚI
         function saveSettings() {
             const maxP = parseFloat(document.getElementById('set-max-power').value);
             const cost = parseFloat(document.getElementById('set-cost').value);
             db.ref('/settings').set({ max_power: maxP, cost: cost })
-                .then(() => alert("Đã lưu cài đặt!"))
+                .then(() => alert("Đã lưu thành công!"))
                 .catch((err) => alert("Lỗi: " + err));
         }
     </script>

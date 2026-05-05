@@ -361,9 +361,9 @@
                     const costStr = new Intl.NumberFormat('vi-VN').format(e * costPerKwh) + ' đ';
                     
                     // ==========================================
-                    // ĐÃ ĐẢO LOGIC LOG: cờ 5_r bằng 0 nghĩa là ON
+                    // ĐÃ ĐẢO LOGIC LOG: cờ 5_r bằng 1 nghĩa là ON
                     // ==========================================
-                    const isTurnedOn = (log['5_r'] === 0); 
+                    const isTurnedOn = (log['5_r'] === 1); 
                     
                     const rowData = [
                         `<span class="fw-bold text-primary">${log['0_time']}</span>`,
@@ -412,8 +412,8 @@
                     if(log['0_time']) {
                         const e = log['4_e'] || 0;
                         
-                        // Đảo logic Excel: cờ 5_r bằng 0 nghĩa là ON
-                        const isTurnedOn = (log['5_r'] === 0);
+                        // Đảo logic Excel: cờ 5_r bằng 1 nghĩa là ON
+                        const isTurnedOn = (log['5_r'] === 1);
                         
                         excelData.push({
                             "Thời gian": log['0_time'],

@@ -84,28 +84,28 @@
             <div class="row g-2 mb-2">
                 <div class="col-xl-3 col-md-6">
                     <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #3b82f6;">
-                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">Today</h6>
+                        <h6 class="text-muted m-0 border-0 fw-bold" style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">Today <span id="date-day" class="text-lowercase fw-normal ms-1" style="font-size: 0.75rem;"></span></h6>
                         <h5 class="text-primary fw-bold m-0" id="cost-day">0 đ</h5>
                         <small class="text-muted" style="font-size: 0.8rem;" id="e-day">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #10b981;">
-                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This week</h6>
+                        <h6 class="text-muted m-0 border-0 fw-bold" style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">This Week <span id="date-week" class="text-lowercase fw-normal ms-1" style="font-size: 0.75rem;"></span></h6>
                         <h5 class="text-success fw-bold m-0" id="cost-week">0 đ</h5>
                         <small class="text-muted" style="font-size: 0.8rem;" id="e-week">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #f59e0b;">
-                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This month</h6>
+                        <h6 class="text-muted m-0 border-0 fw-bold" style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">This Month <span id="date-month" class="text-lowercase fw-normal ms-1" style="font-size: 0.75rem;"></span></h6>
                         <h5 class="text-warning fw-bold m-0" id="cost-month">0 đ</h5>
                         <small class="text-muted" style="font-size: 0.8rem;" id="e-month">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
                     <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #ef4444;">
-                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This year</h6>
+                        <h6 class="text-muted m-0 border-0 fw-bold" style="font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px;">This Year <span id="date-year" class="text-lowercase fw-normal ms-1" style="font-size: 0.75rem;"></span></h6>
                         <h5 class="text-danger fw-bold m-0" id="cost-year">0 đ</h5>
                         <small class="text-muted" style="font-size: 0.8rem;" id="e-year">0.000 kWh</small>
                     </div>
@@ -262,6 +262,36 @@
         function getLocalTimeString() {
             return new Date().toTimeString().split(' ')[0];
         }
+
+        function updateDateLabels() {
+            const now = new Date();
+            
+            // Lấy ngày, tháng, năm hiện tại (định dạng 2 chữ số)
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+
+            // Tính toán ngày bắt đầu và kết thúc của tuần hiện tại (Từ Thứ 2 đến Chủ Nhật)
+            const currentDay = now.getDay(); // 0 là Chủ nhật, 1 là Thứ 2
+            const distanceToMonday = currentDay === 0 ? 6 : currentDay - 1;
+            
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - distanceToMonday);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+            const formatShortDate = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+            // Gắn ngày tháng vừa tính được vào giao diện
+            document.getElementById('date-day').innerText = `(${day}/${month}/${year})`;
+            document.getElementById('date-week').innerText = `(${formatShortDate(startOfWeek)} - ${formatShortDate(endOfWeek)})`;
+            document.getElementById('date-month').innerText = `(${month}/${year})`;
+            document.getElementById('date-year').innerText = `(${year})`;
+        }
+
+        // Chạy hàm này ngay khi tải trang
+        updateDateLabels();
 
         function switchTab(tabName) {
             document.querySelectorAll('.sidebar-menu li').forEach(el => el.classList.remove('active'));

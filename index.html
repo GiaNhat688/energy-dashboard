@@ -440,6 +440,8 @@
         }
 
         function saveSettings() {
+            .then(() => alert("Đã lưu cấu hình an toàn thành công!"))
+            
             db.ref('/settings').set({ 
                 max_power: parseFloat(document.getElementById('set-max-p').value) || 1500,
                 max_current: parseFloat(document.getElementById('set-max-i').value) || 10,
@@ -447,7 +449,6 @@
                 min_voltage: parseFloat(document.getElementById('set-min-v').value) || 180,
                 cost: parseFloat(document.getElementById('set-cost').value) || 3500
             })
-            .then(() => alert("Đã lưu cấu hình an toàn thành công!"))
             .catch((err) => alert("Lỗi lưu cấu hình: " + err));
         }
     </script>

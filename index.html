@@ -32,11 +32,12 @@
         .tab-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .data-card { background: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border-bottom: 4px solid var(--secondary); height: 100%; position: relative; overflow: hidden; }
-        .icon-box { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 15px; }
+        /* ÉP NHỎ THẺ THÔNG SỐ */
+        .data-card { background: var(--card-bg); border-radius: 12px; padding: 15px 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); border-bottom: 4px solid var(--secondary); height: 100%; position: relative; overflow: hidden; }
+        .icon-box { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 10px; }
         .icon-v { background: #e0f2fe; color: #0284c7; } .icon-i { background: #fef08a; color: #ca8a04; }
         .icon-p { background: #fce7f3; color: #db2777; } .icon-e { background: #dcfce7; color: #16a34a; }
-        .card-value { font-size: 2.2rem; font-weight: 700; color: var(--text-dark); margin: 5px 0 0 0; }
+        .card-value { font-size: 1.6rem; font-weight: 700; color: var(--text-dark); margin: 0; }
         .unit { font-size: 1rem; color: #94a3b8; }
         .card-bg-icon { position: absolute; right: -10px; bottom: -15px; font-size: 6rem; opacity: 0.04; color: var(--primary); }
 
@@ -47,10 +48,11 @@
         .btn-relay:hover { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(0,0,0,0.2); }
         .btn-relay:active { transform: scale(0.95); }
 
-        .setting-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 20px; border: 1px solid #f0f0f0; }
-        .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 12px; margin-bottom: 20px; font-weight: 600; color: var(--primary); font-size: 1.1rem;}
+        /* ÉP NHỎ Ô SETTING VÀ CHART */
+        .setting-box { background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.03); margin-bottom: 15px; border: 1px solid #f0f0f0; }
+        .setting-box h6 { border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; font-weight: 600; color: var(--primary); font-size: 1rem;}
         .chart-container { position: relative; height: 180px; width: 100%; }
-        .chart-container-large { position: relative; height: 260px; width: 100%; }
+        .chart-container-large { position: relative; height: 180px; width: 100%; }
         
         .dataTables_wrapper .pagination .page-link { border-radius: 5px; margin: 0 3px; }
         table.dataTable { border-collapse: collapse !important; }
@@ -75,68 +77,69 @@
     <div class="main-content">
         
         <div id="tab-dashboard" class="tab-section active">
-            <h2 class="header-title">Live Dashboard <i class="fas fa-circle pulse-live"></i></h2>
-            <p class="header-subtitle">Real-time energy monitoring overview</p>
+            <h2 class="header-title fs-4">Live Dashboard <i class="fas fa-circle pulse-live"></i></h2>
+            <p class="header-subtitle mb-2">Real-time energy monitoring overview</p>
             
-            <div class="row g-4 mb-4">
-                <h5 class="mt-4 mb-3 text-primary"><i class="fas fa-wallet me-2"></i>Chi Phí Điện Năng (Tạm Tính)</h5>
-            <div class="row g-4 mb-4">
+            <h6 class="mt-2 mb-2 text-primary fw-bold"><i class="fas fa-wallet me-2"></i>Electricity cost (Expected)</h6>
+            <div class="row g-2 mb-2">
                 <div class="col-xl-3 col-md-6">
-                    <div class="setting-box text-center p-3" style="border-bottom: 3px solid #3b82f6; height: 100%;">
-                        <h6 class="text-muted">Hôm nay</h6>
-                        <h4 class="text-primary fw-bold mt-2" id="cost-day">0 đ</h4>
-                        <small class="text-muted" id="e-day">0.000 kWh</small>
+                    <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #3b82f6;">
+                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">Today</h6>
+                        <h5 class="text-primary fw-bold m-0" id="cost-day">0 đ</h5>
+                        <small class="text-muted" style="font-size: 0.8rem;" id="e-day">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="setting-box text-center p-3" style="border-bottom: 3px solid #10b981; height: 100%;">
-                        <h6 class="text-muted">Tuần này</h6>
-                        <h4 class="text-success fw-bold mt-2" id="cost-week">0 đ</h4>
-                        <small class="text-muted" id="e-week">0.000 kWh</small>
+                    <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #10b981;">
+                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This week</h6>
+                        <h5 class="text-success fw-bold m-0" id="cost-week">0 đ</h5>
+                        <small class="text-muted" style="font-size: 0.8rem;" id="e-week">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="setting-box text-center p-3" style="border-bottom: 3px solid #f59e0b; height: 100%;">
-                        <h6 class="text-muted">Tháng này</h6>
-                        <h4 class="text-warning fw-bold mt-2" id="cost-month">0 đ</h4>
-                        <small class="text-muted" id="e-month">0.000 kWh</small>
+                    <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #f59e0b;">
+                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This month</h6>
+                        <h5 class="text-warning fw-bold m-0" id="cost-month">0 đ</h5>
+                        <small class="text-muted" style="font-size: 0.8rem;" id="e-month">0.000 kWh</small>
                     </div>
                 </div>
                 <div class="col-xl-3 col-md-6">
-                    <div class="setting-box text-center p-3" style="border-bottom: 3px solid #ef4444; height: 100%;">
-                        <h6 class="text-muted">Năm nay</h6>
-                        <h4 class="text-danger fw-bold mt-2" id="cost-year">0 đ</h4>
-                        <small class="text-muted" id="e-year">0.000 kWh</small>
+                    <div class="setting-box text-center p-2 m-0" style="border-bottom: 3px solid #ef4444;">
+                        <h6 class="text-muted mb-1 border-0" style="font-size: 0.9rem;">This year</h6>
+                        <h5 class="text-danger fw-bold m-0" id="cost-year">0 đ</h5>
+                        <small class="text-muted" style="font-size: 0.8rem;" id="e-year">0.000 kWh</small>
                     </div>
                 </div>
             </div>
+
+            <div class="row g-2 mb-3">
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #0284c7;"><i class="fas fa-plug card-bg-icon"></i><div class="icon-box icon-v"><i class="fas fa-plug"></i></div><div class="card-title">Voltage</div><h3 class="card-value"><span id="val-v">0.0</span> <span class="unit">V</span></h3></div></div>
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #ca8a04;"><i class="fas fa-wave-square card-bg-icon"></i><div class="icon-box icon-i"><i class="fas fa-wave-square"></i></div><div class="card-title">Current</div><h3 class="card-value"><span id="val-i">0.00</span> <span class="unit">A</span></h3></div></div>
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #db2777;"><i class="fas fa-bolt card-bg-icon"></i><div class="icon-box icon-p"><i class="fas fa-bolt"></i></div><div class="card-title">Active Power</div><h3 class="card-value"><span id="val-p">0.0</span> <span class="unit">W</span></h3></div></div>
                 <div class="col-xl-3 col-md-6"><div class="data-card" style="border-bottom-color: #16a34a;"><i class="fas fa-leaf card-bg-icon"></i><div class="icon-box icon-e"><i class="fas fa-leaf"></i></div><div class="card-title">Total Energy</div><h3 class="card-value"><span id="val-e">0.000</span> <span class="unit">kWh</span></h3></div></div>
             </div>
 
-            <div class="row g-4">
+            <div class="row g-2">
                 <div class="col-lg-8">
-                    <div class="setting-box" style="height: 100%;">
-                        <h6><i class="fas fa-chart-area text-danger me-2"></i> Live Power Trend</h6>
-                        <div class="chart-container-large mt-3"><canvas id="livePowerChart"></canvas></div>
+                    <div class="setting-box m-0" style="height: 100%;">
+                        <h6 class="m-0"><i class="fas fa-chart-area text-danger me-2"></i> Live Power Trend</h6>
+                        <div class="chart-container-large mt-1"><canvas id="livePowerChart"></canvas></div>
                     </div>
                 </div>
                 <div class="col-lg-4">
-                    <div class="setting-box" style="height: 100%;">
-                        <h6><i class="fas fa-info-circle text-primary me-2"></i> System Overview</h6>
-                        <ul class="list-group list-group-flush mt-3">
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
-                                System Status <span id="dash-sys-status" class="badge bg-secondary rounded-pill px-3 py-2">Connecting...</span>
+                    <div class="setting-box m-0" style="height: 100%;">
+                        <h6 class="m-0"><i class="fas fa-info-circle text-primary me-2"></i> System Overview</h6>
+                        <ul class="list-group list-group-flush mt-1">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 text-muted" style="font-size: 0.9rem;">
+                                System Status <span id="dash-sys-status" class="badge bg-secondary rounded-pill px-2 py-1">Connecting...</span>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 text-muted" style="font-size: 0.9rem;">
                                 Electricity Rate <span class="fw-bold text-dark"><span id="dash-rate">3500</span> VNĐ/kWh</span>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted">
-                                Total Cost <span class="fw-bold fs-5 text-info" id="dash-cost">0 đ</span>
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 text-muted" style="font-size: 0.9rem;">
+                                Total Cost <span class="fw-bold fs-6 text-info" id="dash-cost">0 đ</span>
                             </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-3 text-muted border-0">
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 py-2 text-muted border-0" style="font-size: 0.9rem;">
                                 Last Update <span class="small fw-bold" id="dash-time">--:--:--</span>
                             </li>
                         </ul>
@@ -420,6 +423,7 @@
                 });
             });
         });
+        
         // BỔ SUNG: Lắng nghe dữ liệu thống kê từ node /stats
         db.ref('/stats').on('value', (snapshot) => {
             const stats = snapshot.val();

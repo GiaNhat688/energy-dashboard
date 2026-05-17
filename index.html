@@ -440,8 +440,14 @@
         }
 
         function saveSettings() {
-            .then(() => alert("Đã lưu cấu hình an toàn thành công!"))
+            // Lấy phần tử nút bấm vừa được click
+            const btn = event.currentTarget || document.querySelector('button[onclick="saveSettings()"]');
+            const originalText = btn.innerHTML; // Lưu lại chữ gốc của nút
             
+            // 1. Đổi chữ và thêm hiệu ứng xoay ngay lập tức
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Đang lưu...';
+            btn.disabled = true; // Khóa nút tạm thời để tránh bấm đúp
+        
             db.ref('/settings').set({ 
                 max_power: parseFloat(document.getElementById('set-max-p').value) || 1500,
                 max_current: parseFloat(document.getElementById('set-max-i').value) || 10,
@@ -449,7 +455,23 @@
                 min_voltage: parseFloat(document.getElementById('set-min-v').value) || 180,
                 cost: parseFloat(document.getElementById('set-cost').value) || 3500
             })
-            .catch((err) => alert("Lỗi lưu cấu hình: " + err));
+            .then(() => {
+                // 2. Khi Firebase phản hồi thành công, đổi thành chữ "Đã lưu!"
+                btn.innerHTML = '<i class="fas fa-check me-2"></i> Đã lưu thành công!';
+                btn.classList.replace('btn-primary', 'btn-success'); // Đổi màu nút sang xanh lá
+                
+                // 3. Chờ 2 giây rồi trả nút về trạng thái ban đầu
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.replace('btn-success', 'btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+            })
+            .catch((err) => {
+                alert("Lỗi mạng khi lưu cấu hình: " + err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
         }
     </script>
 </body>
